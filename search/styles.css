@@ -1,0 +1,126 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    color: #202124;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.search-container {
+    text-align: center;
+    width: 100%;
+    max-width: 584px;
+    margin-bottom: 20px;
+}
+
+.logo {
+    max-width: 272px;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.search-box {
+    display: flex;
+    border: 1px solid #dfe1e5;
+    border-radius: 24px;
+    padding: 5px 8px;
+}
+
+#search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    padding: 0 13px;
+}
+
+#search-button {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0 13px;
+}
+
+#search-button svg {
+    width: 24px;
+    height: 24px;
+    fill: #9aa0a6;
+}
+
+#results {
+    width: 100%;
+    max-width: 652px;
+    margin-top: 20px;
+}
+
+.result-item {
+    margin-bottom: 20px;
+}
+
+.result-title {
+    color: #1a0dab;
+    font-size: 18px;
+    text-decoration: none;
+}
+
+.result-url {
+    color: #006621;
+    font-size: 14px;
+}
+
+.result-score {
+    color: #545454;
+    font-size: 13px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.page-button {
+    background-color: #f8f9fa;
+    border: 1px solid #f8f9fa;
+    border-radius: 4px;
+    color: #3c4043;
+    font-size: 14px;
+    padding: 10px 16px;
+    margin: 0 4px;
+    cursor: pointer;
+}
+
+.page-button:disabled {
+    color: #80868b;
+    cursor: default;
+}
+
+#page-info {
+    margin: 0 10px;
+    font-size: 14px;
+    color: #3c4043;
+}
+
+@media (max-width: 768px) {
+    .search-box {
+        width: 90%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+}

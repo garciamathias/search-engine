@@ -26,7 +26,7 @@ nltk.download('punkt', quiet=True)
 nltk.download('stopwords', quiet=True)
 
 # Configuration du logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 class Crawler:
@@ -48,17 +48,46 @@ class Crawler:
     async def init_db(self):
         try:
             self.db_conn = sqlite3.connect('crawler_data.db')
-            logger.info("Connected to existing database: crawler_data.db")
+            logger.info("Connected to database: crawler_data.db")
         except sqlite3.Error as e:
             logger.error(f"Error connecting to database: {str(e)}")
             raise
 
         cursor = self.db_conn.cursor()
-        tables = ['pages', 'queue', 'inverted_index']
-        for table in tables:
-            cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table}'")
-            if cursor.fetchone() is None:
-                logger.warning(f"Table '{table}' does not exist in the database.")
+        
+        # Définition des schémas de table
+        table_schemas = {
+            'pages': '''
+                CREATE TABLE IF NOT EXISTS pages (
+                    url TEXT PRIMARY KEY,
+                    title TEXT,
+                    content TEXT
+                )
+            ''',
+            'queue': '''
+                CREATE TABLE IF NOT EXISTS queue (
+                    url TEXT PRIMARY KEY
+                )
+            ''',
+            'inverted_index': '''
+                CREATE TABLE IF NOT EXISTS inverted_index (
+                    word TEXT,
+                    url TEXT,
+                    tf_idf REAL,
+                    PRIMARY KEY (word, url)
+                )
+            '''
+        }
+
+        # Création des tables si elles n'existent pas
+        for table, schema in table_schemas.items():
+            try:
+                cursor.execute(schema)
+                logger.info(f"Table '{table}' created or already exists.")
+            except sqlite3.Error as e:
+                logger.error(f"Error creating table '{table}': {str(e)}")
+
+        self.db_conn.commit()
         cursor.close()
 
     async def fetch(self, url, session):
@@ -66,8 +95,6 @@ class Crawler:
             async with session.get(url, timeout=10, ssl=False) as response:
                 if response.status == 200:
                     return await response.text()
-                else:
-                    logger.warning(f"Failed to fetch {url}: HTTP {response.status}")
         except Exception as e:
             logger.error(f"Error fetching {url}: {str(e)}")
         return None
@@ -111,7 +138,7 @@ class Crawler:
 
             await self.index_page(url, title, content)
 
-        logger.info(f"Crawled and indexed: {url}")
+        logger.info(f"Crawled: {url}")
 
     def can_fetch(self, url):
         try:
@@ -121,9 +148,7 @@ class Crawler:
                 rp.set_url(f"http://{domain}/robots.txt")
                 rp.read()
                 self.rp_cache[domain] = rp
-            allowed = self.rp_cache[domain].can_fetch("*", url)
-            logger.debug(f"Robot check for {url}: {'Allowed' if allowed else 'Not allowed'}")
-            return allowed
+            return self.rp_cache[domain].can_fetch("*", url)
         except Exception as e:
             logger.error(f"Error checking robots.txt for {url}: {str(e)}")
             return True
@@ -139,7 +164,6 @@ class Crawler:
 
     async def add_to_queue(self, url):
         self.mini_queue.append(url)
-        logger.debug(f"Added URL to mini-queue: {url}")
         if len(self.mini_queue) >= 100:
             await self.flush_queue_to_db()
 
@@ -151,7 +175,6 @@ class Crawler:
             cursor.executemany("INSERT OR IGNORE INTO queue (url) VALUES (?)",
                                [(url,) for url in self.mini_queue])
             self.db_conn.commit()
-            logger.debug(f"Flushed {len(self.mini_queue)} URLs to database")
             self.mini_queue.clear()
         except Exception as e:
             logger.error(f"Error flushing queue to database: {str(e)}")
@@ -167,7 +190,6 @@ class Crawler:
                     cursor.execute("DELETE FROM queue WHERE url IN (" + ",".join("?" * len(urls)) + ")",
                                    [url[0] for url in urls])
                     self.db_conn.commit()
-                    logger.debug(f"Loaded {len(urls)} URLs from database to mini-queue")
             except Exception as e:
                 logger.error(f"Error getting next URL from database: {str(e)}")
 
@@ -202,7 +224,6 @@ class Crawler:
                             (word, url, tf_idf))
             
             self.db_conn.commit()
-            logger.info(f"Indexed {len(word_count)} words for {url}")
         except Exception as e:
             logger.error(f"Error indexing page {url}: {str(e)}")
 
@@ -212,18 +233,14 @@ class Crawler:
                 url = await self.get_next_url()
                 if url is None:
                     if self.to_crawl.empty():
-                        logger.info("No more URLs to crawl. Worker stopping.")
                         break
                     url = await self.to_crawl.get()
                     process_queue_item = True
                 else:
                     process_queue_item = False
                 
-                logger.info(f"Worker processing URL: {url}")
                 if url not in self.crawled_urls:
                     await self.crawl_page(url)
-                else:
-                    logger.info(f"URL already crawled: {url}")
                 
                 if process_queue_item:
                     self.to_crawl.task_done()
@@ -235,17 +252,13 @@ class Crawler:
     async def run(self):
         logger.info("Starting crawler...")
         await self.init_db()
-        logger.info("Database initialized")
         self.session = aiohttp.ClientSession()
-        logger.info("Session created")
 
         for url in self.starting_urls:
             await self.to_crawl.put(url)
-            logger.info(f"Added starting URL to queue: {url}")
 
         workers = [asyncio.create_task(self.worker()) for _ in range(self.num_workers)]
 
-        # Attendre que tous les workers terminent
         await asyncio.gather(*workers)
 
         await self.flush_queue_to_db()
@@ -255,8 +268,8 @@ class Crawler:
         logger.info(f"Crawling complete. Total URLs crawled: {len(self.crawled_urls)}")
 
 if __name__ == "__main__":
-    starting_urls = ["https://lemonde.fr", "https://www.lefigaro.fr/"]
-    crawler = Crawler(starting_urls, max_urls=10000)  # Augmenté à 1000 URLs pour un test plus complet
+    starting_urls = ["https://fr.wikipedia.org/", "https://fr.wikipedia.org/"]
+    crawler = Crawler(starting_urls, max_urls=10000)
     try:
         asyncio.run(crawler.run())
     except Exception as e:
