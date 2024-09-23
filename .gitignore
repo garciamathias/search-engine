@@ -1,0 +1,29 @@
+# Environnement virtuel
+search_engine_env/
+
+# Fichiers Python compilés
+__pycache__/
+*.py[cod]
+
+# Fichiers de distribution / packaging
+*.egg-info/
+dist/
+build/
+
+# Fichiers de l'IDE
+.idea/
+.vscode/
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers de logs
+*.log
+
+# Fichiers temporaires
+*.tmp
+
+# Fichiers de base de données
+*.db
+*.sqlite3
