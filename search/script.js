@@ -31,15 +31,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (query === '') return;
 
         currentPage = page;
-        const offset = (currentPage - 1) * resultsPerPage;
+        const limit = resultsPerPage;
 
         resultsContainer.innerHTML = '<p class="loading">Recherche en cours...</p>';
 
-        fetch(`http://localhost:8000/search?query=${encodeURIComponent(query)}&limit=${resultsPerPage}&offset=${offset}`)
+        fetch(`http://localhost:8000/search?query=${encodeURIComponent(query)}&limit=${limit}`)
             .then(response => response.json())
             .then(data => {
                 displayResults(data.results);
-                updatePagination(data.total_results);
+                updatePagination(data.results.length);
             })
             .catch(error => {
                 console.error('Erreur:', error);
@@ -59,7 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="result-item">
                     <a href="${result.url}" class="result-title" target="_blank">${result.title}</a>
                     <div class="result-url">${result.url}</div>
-                    <div class="result-score">Score: ${result.score.toFixed(4)}</div>
+                    <div class="result-score">Score combiné: ${result.combined_score.toFixed(4)}</div>
+                    <div class="result-category">Catégorie: ${result.category}</div>
                 </div>
             `;
         });
@@ -67,10 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsContainer.innerHTML = resultsHtml;
     }
 
-    function updatePagination(totalResults) {
-        const totalPages = Math.ceil(totalResults / resultsPerPage);
-        pageInfo.textContent = `Page ${currentPage} sur ${totalPages}`;
+    function updatePagination(resultCount) {
+        pageInfo.textContent = `Page ${currentPage}`;
         prevPageButton.disabled = (currentPage === 1);
-        nextPageButton.disabled = (currentPage === totalPages);
+        nextPageButton.disabled = (resultCount < resultsPerPage);
     }
 });
