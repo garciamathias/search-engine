@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 from urllib.robotparser import RobotFileParser
 import time
-import sqlite3
+import sqlite3 
 from collections import deque
 import logging
 import math

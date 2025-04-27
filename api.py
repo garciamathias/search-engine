@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import sqlite3
 import math
 import numpy as np
-import logging
+import logging 
 import base64
 
 # Configuration du logging

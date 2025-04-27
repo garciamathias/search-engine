@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsContainer = document.getElementById('results');
     const prevPageButton = document.getElementById('prev-page');
     const nextPageButton = document.getElementById('next-page');
-    const pageInfo = document.getElementById('page-info');
+    const pageInfo = document.getElementById('page-info'); 
 
     let currentPage = 1;
     const resultsPerPage = 10;

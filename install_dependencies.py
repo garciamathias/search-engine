@@ -31,6 +31,6 @@ import nltk
 
 nltk.download('punkt')
 nltk.download('punkt_tab')
-nltk.download('stopwords')
+nltk.download('stopwords') 
 
 print("Configuration terminée. Vous pouvez maintenant exécuter le crawler.")

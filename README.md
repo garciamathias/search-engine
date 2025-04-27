@@ -78,7 +78,7 @@ python api.py
 
 The API will be accessible at: `http://localhost:8000`
 
-## 🔍 API Endpoints
+## API Endpoints
 
 ### Search
 ```
