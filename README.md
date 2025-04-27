@@ -4,7 +4,7 @@
 
 A sophisticated web search engine developed in Python, combining web crawling, indexing, and semantic search.
 
-## 🎯 Project Objective
+## Project Objective
 
 Guugle is an educational implementation that reproduces the fundamental mechanisms of Google Search. This project aims to understand and implement the key concepts that make modern search engines successful:
 
@@ -15,7 +15,7 @@ Guugle is an educational implementation that reproduces the fundamental mechanis
 
 This project is an excellent resource for understanding the fundamental principles of search engines and the architecture of large-scale web search systems.
 
-## 🚀 Features
+## Features
 
 - **Intelligent Web Crawling**
   - Respect for robots.txt rules
@@ -35,7 +35,7 @@ This project is an excellent resource for understanding the fundamental principl
   - Category filtering
   - Result limit control
 
-## 🛠️ Technologies Used
+## Technologies Used
 
 - **Backend**
   - FastAPI for REST API
@@ -51,7 +51,7 @@ This project is an excellent resource for understanding the fundamental principl
   - numpy and scipy for calculations
   - networkx for PageRank
 
-## 📦 Installation
+## Installation
 
 1. Clone the repository:
 ```bash
@@ -64,7 +64,7 @@ cd search-engine
 python install_dependencies.py
 ```
 
-## 🚀 Usage
+## Usage
 
 1. **Launch the Crawler**
 ```bash
@@ -90,7 +90,7 @@ GET /search?query=<search_term>&limit=<number_of_results>
 GET /categories
 ```
 
-## 📊 Database Structure
+## Database Structure
 
 - **pages**: Storage of crawled web pages
 - **inverted_index**: Inverted index for search
